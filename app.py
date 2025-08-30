@@ -12,7 +12,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)
+db = SQLAlchemy(app)
 
 class Menu(db.Model):
     __tablename__ = "pesanan"   # pastikan sama dengan nama tabel di MySQL
@@ -165,6 +165,7 @@ def api_delete_order(order_id):
 if __name__ == "__main__":
 
     app.run(debug=True)
+
 
 
 
