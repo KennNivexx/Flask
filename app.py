@@ -10,10 +10,10 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
 
 conn = mysql.connector.connect(
-    host = sql312.infinityfree.com
-    user = if0_39823849
-    password = TXzWsbeNZO5MEV9
-    database = if0_39823849_restoran
+    host = sql312.infinityfree.com,
+    user = if0_39823849,
+    password = TXzWsbeNZO5MEV9,
+    database = if0_39823849_restoran,
 )
 # ----- PAGES -----
 @app.route("/")
@@ -159,6 +159,7 @@ def api_delete_order(order_id):
 if __name__ == "__main__":
 
     app.run(debug=True)
+
 
 
 
