@@ -2,10 +2,12 @@ from flask import Flask, render_template, request, jsonify
 import mysql.connector
 from mysql.connector import Error
 import os
+from flask_cors import CORS
 
 port = int(os.environ.get("PORT",5000))
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
+CORS(app)
 
 conn = mysql.connector.connect(
     host = sql312.infinityfree.com
@@ -157,5 +159,6 @@ def api_delete_order(order_id):
 if __name__ == "__main__":
 
     app.run(debug=True)
+
 
 
