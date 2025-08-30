@@ -4,21 +4,11 @@ from mysql.connector import Error
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
-# ----- KONFIGURASI DATABASE (ubah sesuai data TiDB Cloud) -----
-DB_CONFIG = dict(
-    host="gateway01.ap-southeast-1.prod.aws.tidbcloud.com",
-    port=4000,
-    user="jualanku.root",  # ganti sesuai user cluster lo
-    password="Qa9b3psAcoq8uBIX",    # ganti pake password TiDB lo
-    database="restoran",             # nama database yg lo buat
-    ssl_ca="C:/Users/MyBook Hype AMD/Downloads/isrgrootx1.pem",       # path ke CA file yg lo download dari TiDB Cloud
-    ssl_verify_cert=True,
-    ssl_verify_identity=True,
-    autocommit=True
-)
-
-def get_conn():
-    return mysql.connector.connect(**DB_CONFIG)
+conn = mysql.connector.connect(
+    host = sql312.infinityfree.com
+    user = if0_39823849
+    password = TXzWsbeNZO5MEV9
+    database = if0_39823849_restoran
 
 # ----- PAGES -----
 @app.route("/")
@@ -162,4 +152,5 @@ def api_delete_order(order_id):
     return jsonify({"ok": True})
 
 if __name__ == "__main__":
+
     app.run(debug=True)
