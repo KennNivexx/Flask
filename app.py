@@ -8,7 +8,7 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = (
-    "mysql://root:poLaaimRkGHBdFcrCaiylBVZcXDbvGGn@metro.proxy.rlwy.net:49974/railway"
+    "mysql+pymysql://root:poLaaimRkGHBdFcrCaiylBVZcXDbvGGn@metro.proxy.rlwy.net:49974/railway"
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -158,6 +158,7 @@ def api_delete_order(order_id):
 if __name__ == "__main__":
 
     app.run(debug=True)
+
 
 
 
