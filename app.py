@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, jsonify
 import mysql.connector
 from mysql.connector import Error
+import os
+
+port = int(os.environ.get("PORT",5000))
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
@@ -154,3 +157,4 @@ def api_delete_order(order_id):
 if __name__ == "__main__":
 
     app.run(debug=True)
+
