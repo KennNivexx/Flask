@@ -3,6 +3,7 @@ import mysql.connector
 from mysql.connector import Error
 import os
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
@@ -165,6 +166,7 @@ def api_delete_order(order_id):
 if __name__ == "__main__":
 
     app.run(debug=True)
+
 
 
 
