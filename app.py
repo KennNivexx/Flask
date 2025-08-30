@@ -24,6 +24,9 @@ class Menu(db.Model):
 
 # ----- PAGES -----
 @app.route("/")
+def home():
+    return "Backend Jalan Brooo"
+@app.route("/menu")
 def page_menu():
     return render_template("menu.html")
 
@@ -166,6 +169,7 @@ def api_delete_order(order_id):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT",5000))
     app.run(host="0.0.0.0",port=port)
+
 
 
 
