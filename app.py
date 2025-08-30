@@ -12,7 +12,7 @@ conn = mysql.connector.connect(
     user = if0_39823849
     password = TXzWsbeNZO5MEV9
     database = if0_39823849_restoran
-
+)
 # ----- PAGES -----
 @app.route("/")
 def page_menu():
@@ -157,4 +157,5 @@ def api_delete_order(order_id):
 if __name__ == "__main__":
 
     app.run(debug=True)
+
 
