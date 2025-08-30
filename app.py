@@ -14,6 +14,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+class Menu(db.Model):
+    __tablename__ = "pesanan"   # pastikan sama dengan nama tabel di MySQL
+    id = db.Column(db.Integer, primary_key=True)
+    nama = db.Column(db.String(100))
+    harga = db.Column(db.Integer)
+
+
 # ----- PAGES -----
 @app.route("/")
 def page_menu():
@@ -158,6 +165,7 @@ def api_delete_order(order_id):
 if __name__ == "__main__":
 
     app.run(debug=True)
+
 
 
 
