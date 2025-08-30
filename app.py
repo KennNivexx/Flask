@@ -4,17 +4,16 @@ from mysql.connector import Error
 import os
 from flask_cors import CORS
 
-port = int(os.environ.get("PORT",5000))
-
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
 
-conn = mysql.connector.connect(
-    host = "sql312.infinityfree.com",
-    user = "if0_39823849",
-    password = "TXzWsbeNZO5MEV9",
-    database = "if0_39823849_restoran"
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    "mysql://root:poLaaimRkGHBdFcrCaiylBVZcXDbvGGn@metro.proxy.rlwy.net:49974/railway"
 )
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
 # ----- PAGES -----
 @app.route("/")
 def page_menu():
@@ -159,6 +158,7 @@ def api_delete_order(order_id):
 if __name__ == "__main__":
 
     app.run(debug=True)
+
 
 
 
