@@ -173,3 +173,4 @@ def api_delete_order(order_id):
 def handler(event, context):
     from flask import Request
     return app(event, context)
+start_response=lambda *args:none
