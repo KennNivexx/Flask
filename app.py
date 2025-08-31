@@ -2,181 +2,174 @@ from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import os
-from sqlalchemy import create_engine, inspect
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
 
-# ---- Database Config ----
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    "mysql+pymysql://root:poLaaimRkGHBdFcrCaiylBVZcXDbvGGn@metro.proxy.rlwy.net:49974/railway"
-)
+# ===== Database Config =====
+DB_USER = "root",
+DB_PASS = "poLaaimRkGHBdFcrCaiylBVZcXDbvGGn",
+DB_HOST = "metro.proxy.rlwy.net>",
+DB_PORT = 49974,
+DB_NAME = "railway"
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-engine = create_engine("mysql+pymysql://root:poLaaimRkGHBdFcrCaiylBVZcXDbvGGn@metro.proxy.rlwy.net:49974/railway")
+# ===== MODELS =====
+class Menu(db.Model):
+    _tablename_ = "menu"
+    id = db.Column(db.Integer, primary_key=True)
+    nama = db.Column(db.String(255), nullable=False)
+    harga = db.Column(db.Integer, nullable=False)
+    gambar = db.Column(db.String(255))
+    kategori = db.Column(db.String(50), default="makanan")
 
-insp = inspect(engine)
+class Pesanan(db.Model):
+    _tablename_ = "pesanan"
+    id = db.Column(db.Integer, primary_key=True)
+    nama_pembeli = db.Column(db.String(255))
+    nomor_meja = db.Column(db.String(50))
+    total = db.Column(db.Integer)
+    status = db.Column(db.String(50), default="dibayar")
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    items = db.relationship("DetailPesanan", backref="pesanan", cascade="all, delete-orphan")
 
-print("Tables:", insp.get_table_names())
+class DetailPesanan(db.Model):
+    _tablename_ = "detail_pesanan"
+    id = db.Column(db.Integer, primary_key=True)
+    pesanan_id = db.Column(db.Integer, db.ForeignKey("pesanan.id"))
+    menu_id = db.Column(db.Integer, db.ForeignKey("menu.id"))
+    jumlah = db.Column(db.Integer, default=1)
 
-# Daftar tabel yang kamu punya
-tables = ["detail_pesanan", "menu", "pesanan"]
-
-for table_name in tables:
-    print(f"\nColumns for table '{table_name}':")
-    for col in insp.get_columns(table_name):
-        print(f"- {col['name']} ({col['type']})")
-# ---- PAGES ----
+# ===== ROUTES =====
 @app.route("/")
 def home():
-    return jsonify ({ "✅ Backend Jalan Brooo" })
-
-@app.route("/menu")
-def page_menu():
-    return render_template("menu.html")
-
-@app.route("/penjual")
-def page_penjual():
-    return render_template("penjual.html")
+    return jsonify({"✅ Backend Jalan Brooo": True})
 
 # ---- API MENUS ----
 @app.route("/api/menus", methods=["GET"])
 def api_get_menus():
-    with db.engine.connect() as conn:
-        result = conn.execute(
-            "SELECT id, nama, harga, COALESCE(gambar,'') AS gambar, kategori FROM menu ORDER BY id ASC"
-        )
-        rows = [dict(r._mapping) for r in result]
-    return jsonify(rows)
+    menus = Menu.query.order_by(Menu.id).all()
+    return jsonify([{
+        "id": m.id,
+        "nama": m.nama,
+        "harga": m.harga,
+        "gambar": m.gambar or "",
+        "kategori": m.kategori
+    } for m in menus])
 
 @app.route("/api/menus", methods=["POST"])
 def api_add_menu():
     data = request.json or {}
     nama = (data.get("nama") or "").strip()
-    try:
-        harga = int(data.get("harga") or 0)
-    except:
-        harga = 0
-    gambar = (data.get("gambar") or "").strip() or None
+    harga = int(data.get("harga") or 0)
+    gambar = data.get("gambar") or None
     kategori = data.get("kategori") if data.get("kategori") in ("makanan","minuman","dessert") else "makanan"
 
     if not nama or harga <= 0:
         return jsonify({"ok": False, "msg": "Nama/harga tidak valid"}), 400
 
-    with db.engine.begin() as conn:
-        result = conn.execute(
-            "INSERT INTO menu (nama,harga,gambar,kategori) VALUES (%s,%s,%s,%s)",
-            (nama,harga,gambar,kategori)
-        )
-        menu_id = result.lastrowid
-    return jsonify({"ok": True, "id": menu_id})
+    m = Menu(nama=nama, harga=harga, gambar=gambar, kategori=kategori)
+    db.session.add(m)
+    db.session.commit()
+    return jsonify({"ok": True, "id": m.id})
 
 @app.route("/api/menus/<int:menu_id>", methods=["PATCH","PUT"])
 def api_update_menu(menu_id):
     data = request.json or {}
-    nama = (data.get("nama") or "").strip()
-    try:
-        harga = int(data.get("harga") or 0)
-    except:
-        harga = 0
-    gambar = (data.get("gambar") or "").strip() or None
-    kategori = data.get("kategori") if data.get("kategori") in ("makanan","minuman","dessert") else "makanan"
-
-    with db.engine.begin() as conn:
-        conn.execute(
-            "UPDATE menu SET nama=%s, harga=%s, gambar=%s, kategori=%s WHERE id=%s",
-            (nama,harga,gambar,kategori,menu_id)
-        )
+    m = Menu.query.get(menu_id)
+    if not m:
+        return jsonify({"ok": False, "msg": "Menu tidak ditemukan"}), 404
+    m.nama = data.get("nama", m.nama)
+    m.harga = int(data.get("harga") or m.harga)
+    m.gambar = data.get("gambar") or m.gambar
+    m.kategori = data.get("kategori") or m.kategori
+    db.session.commit()
     return jsonify({"ok": True})
 
 @app.route("/api/menus/<int:menu_id>", methods=["DELETE"])
 def api_delete_menu(menu_id):
-    with db.engine.begin() as conn:
-        conn.execute("DELETE FROM menu WHERE id=%s", (menu_id,))
+    m = Menu.query.get(menu_id)
+    if m:
+        db.session.delete(m)
+        db.session.commit()
     return jsonify({"ok": True})
 
 # ---- API ORDERS ----
 @app.route("/api/orders", methods=["GET"])
 def api_get_orders():
-    with db.engine.connect() as conn:
-        result = conn.execute("SELECT * FROM pesanan ORDER BY created_at DESC")
-        orders = [dict(r._mapping) for r in result]
-
-        for o in orders:
-            items = conn.execute(
-                """
-                SELECT d.jumlah, m.id AS menu_id, m.nama, m.harga, m.gambar
-                FROM detail_pesanan d
-                JOIN menu m ON m.id = d.menu_id
-                WHERE d.pesanan_id = %s
-                """,
-                (o["id"],)
-            )
-            o["items"] = [dict(r._mapping) for r in items]
-    return jsonify(orders)
+    orders = Pesanan.query.order_by(Pesanan.created_at.desc()).all()
+    out = []
+    for o in orders:
+        out.append({
+            "id": o.id,
+            "nama_pembeli": o.nama_pembeli,
+            "nomor_meja": o.nomor_meja,
+            "total": o.total,
+            "status": o.status,
+            "created_at": o.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+            "items": [{
+                "menu_id": i.menu_id,
+                "jumlah": i.jumlah,
+                "nama": Menu.query.get(i.menu_id).nama,
+                "harga": Menu.query.get(i.menu_id).harga,
+                "gambar": Menu.query.get(i.menu_id).gambar
+            } for i in o.items]
+        })
+    return jsonify(out)
 
 @app.route("/api/orders", methods=["POST"])
 def api_create_order():
-    data = request.get_json(force=True, silent=True) or {}
-    nama = (data.get("nama") or data.get("nama_pembeli") or "").strip()
-    nomor_meja = (data.get("nomorMeja") or data.get("nomor_meja") or "").strip()
-    cart = data.get("cart") or data.get("items") or []
+    data = request.json or {}
+    nama = data.get("nama") or ""
+    nomor_meja = data.get("nomor_meja") or ""
+    cart = data.get("cart") or []
 
     if not nama or not nomor_meja or not cart:
         return jsonify({"ok": False, "msg": "Data tidak lengkap"}), 400
 
     total = 0
-    clean = []
-    with db.engine.connect() as conn:
-        for it in cart:
-            try:
-                menu_id = int(it.get("id"))
-                qty = max(1, int(it.get("qty")))
-            except:
-                continue
-            row = conn.execute("SELECT id, harga FROM menu WHERE id=%s", (menu_id,)).fetchone()
-            if not row:
-                continue
-            total += int(row.harga) * qty
-            clean.append({"menu_id": int(row.id), "qty": qty})
+    pesanan = Pesanan(nama_pembeli=nama, nomor_meja=nomor_meja, total=0)
+    db.session.add(pesanan)
+    db.session.flush()  # supaya dapat id
 
-    if total <= 0 or not clean:
-        return jsonify({"ok": False, "msg": "Keranjang kosong/invalid"}), 400
+    for item in cart:
+        menu = Menu.query.get(item["id"])
+        if not menu:
+            continue
+        jumlah = max(1, int(item.get("qty", 1)))
+        total += menu.harga * jumlah
+        dp = DetailPesanan(pesanan_id=pesanan.id, menu_id=menu.id, jumlah=jumlah)
+        db.session.add(dp)
 
-    with db.engine.begin() as conn:
-        result = conn.execute(
-            "INSERT INTO pesanan (nama_pembeli, nomor_meja, total, status, created_at) "
-            "VALUES (%s,%s,%s,%s,NOW())",
-            (nama, nomor_meja, total, "dibayar")
-        )
-        order_id = result.lastrowid
-        for it in clean:
-            conn.execute(
-                "INSERT INTO detail_pesanan (pesanan_id, menu_id, jumlah) VALUES (%s,%s,%s)",
-                (order_id, it["menu_id"], it["qty"])
-            )
-    return jsonify({"ok": True, "order_id": order_id, "total": total})
+    pesanan.total = total
+    db.session.commit()
+    return jsonify({"ok": True, "order_id": pesanan.id, "total": total})
 
 @app.route("/api/orders/<int:order_id>/status", methods=["PATCH"])
 def api_update_order_status(order_id):
     data = request.json or {}
     status = data.get("status")
+    o = Pesanan.query.get(order_id)
+    if not o:
+        return jsonify({"ok": False, "msg": "Order tidak ditemukan"}), 404
     if status not in ("pending","dibayar","selesai"):
         return jsonify({"ok": False, "msg": "status invalid"}), 400
-    with db.engine.begin() as conn:
-        conn.execute("UPDATE pesanan SET status=%s WHERE id=%s", (status, order_id))
+    o.status = status
+    db.session.commit()
     return jsonify({"ok": True})
 
 @app.route("/api/orders/<int:order_id>", methods=["DELETE"])
 def api_delete_order(order_id):
-    with db.engine.begin() as conn:
-        conn.execute("DELETE FROM detail_pesanan WHERE pesanan_id=%s", (order_id,))
-        conn.execute("DELETE FROM pesanan WHERE id=%s", (order_id,))
+    o = Pesanan.query.get(order_id)
+    if o:
+        db.session.delete(o)
+        db.session.commit()
     return jsonify({"ok": True})
 
-# ---- MAIN ----
-if __name__== "__main__":
+# ===== MAIN =====
+if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-
     app.run(host="0.0.0.0", port=port)
