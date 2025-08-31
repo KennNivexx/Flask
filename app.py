@@ -13,7 +13,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = DB_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# ---- Lazy DB connection with retry ----
+# Lazy DB connection with retry
 def get_engine(retries=5, delay=2):
     for i in range(retries):
         try:
