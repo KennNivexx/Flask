@@ -15,7 +15,7 @@ DB_PORT = 49974
 DB_NAME = "railway"
 
 engine = create_engine(DB_URL, pool_pre_ping=True)
-DB_URL = os.getenv("mysql://root:poLaaimRkGHBdFcrCaiylBVZcXDbvGGn@mysql.railway.internal:3306/railway"
+DB_URL = os.getenv("mysql://root:poLaaimRkGHBdFcrCaiylBVZcXDbvGGn@mysql.railway.internal:3306/railway")
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -176,6 +176,7 @@ def api_delete_order(order_id):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
