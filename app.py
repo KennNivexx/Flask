@@ -19,7 +19,7 @@ db = SQLAlchemy(app)
 
 # ===== MODELS =====
 class Menu(db.Model):
-    _tablename_ = "menu"
+    __tablename__ = "menu"
     id = db.Column(db.Integer, primary_key=True)
     nama = db.Column(db.String(255), nullable=False)
     harga = db.Column(db.Integer, nullable=False)
@@ -27,7 +27,7 @@ class Menu(db.Model):
     kategori = db.Column(db.String(50), default="makanan")
 
 class Pesanan(db.Model):
-    _tablename_ = "pesanan"
+    __tablename__ = "pesanan"
     id = db.Column(db.Integer, primary_key=True)
     nama_pembeli = db.Column(db.String(255))
     nomor_meja = db.Column(db.String(50))
@@ -37,7 +37,7 @@ class Pesanan(db.Model):
     items = db.relationship("DetailPesanan", backref="pesanan", cascade="all, delete-orphan")
 
 class DetailPesanan(db.Model):
-    _tablename_ = "detail_pesanan"
+    __tablename__ = "detail_pesanan"
     id = db.Column(db.Integer, primary_key=True)
     pesanan_id = db.Column(db.Integer, db.ForeignKey("pesanan.id"))
     menu_id = db.Column(db.Integer, db.ForeignKey("menu.id"))
@@ -173,3 +173,4 @@ def api_delete_order(order_id):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
