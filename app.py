@@ -4,7 +4,7 @@ from flask_cors import CORS
 import os
 from sqlalchemy import create_engine, inspect
 
-app = Flask(_name_, static_folder='static', template_folder='templates')
+app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
 
 # ---- Database Config ----
@@ -176,6 +176,7 @@ def api_delete_order(order_id):
     return jsonify({"ok": True})
 
 # ---- MAIN ----
-if _name_ == "_main_":
-    port = int(os.environ.get("PORT", 5000))
+if __name__ == "__main__":
+    port= int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
