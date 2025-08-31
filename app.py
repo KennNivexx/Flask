@@ -29,7 +29,7 @@ def get_engine(retries=5, delay=2):
 # ---- Pages ----
 @app.route("/")
 def home():
-    return jsonify({"status":"ok", "msg":"Backend jalan di Railway (gratisan)"})
+    return jsonify({"status":"ok", "msg":"Backend jalan di Railway (free plan, debug)"})
 
 @app.route("/menu")
 def page_menu():
