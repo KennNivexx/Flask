@@ -9,11 +9,11 @@ CORS(app)
 # ===== Database Config =====
 DB_USER = "root",
 DB_PASS = "poLaaimRkGHBdFcrCaiylBVZcXDbvGGn",
-DB_HOST = "metro.proxy.rlwy.net>",
+DB_HOST = "metro.proxy.rlwy.net",
 DB_PORT = 49974,
 DB_NAME = "railway"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://root:poLaaimRkGHBdFcrCaiylBVZcXDbvGGn@metro.proxy.rlwy.net:49974/railway"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -173,4 +173,5 @@ def api_delete_order(order_id):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
