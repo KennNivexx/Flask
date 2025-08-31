@@ -4,29 +4,29 @@ from flask_cors import CORS
 import os
 from sqlalchemy import create_engine, inspect
 
-app = Flask(__name__, static_folder='static', template_folder='templates')
+app = Flask(_name_, static_folder='static', template_folder='templates')
 CORS(app)
 
 # ---- Database Config ----
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    "mysql+pymysql://root:poLaaimRkGHBdFcrCaiylBVZcXDbvGGn@metro.proxy.rlwy.net:49974/railway"
-)
+DB_URI = "mysql+pymysql://root:poLaaimRkGHBdFcrCaiylBVZcXDbvGGn@metro.proxy.rlwy.net:49974/railway"
+app.config['SQLALCHEMY_DATABASE_URI'] = DB_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+engine = create_engine(DB_URI)
 
-engine = create_engine("mysql+pymysql://root:poLaaimRkGHBdFcrCaiylBVZcXDbvGGn@metro.proxy.rlwy.net:49974/railway")
+# ---- API untuk melihat kolom tabel ----
+@app.route("/api/tables")
+def api_get_tables():
+    insp = inspect(engine)
+    tables = ["detail_pesanan", "menu", "pesanan"]
+    all_columns = {}
+    for table_name in tables:
+        all_columns[table_name] = [
+            {"name": col["name"], "type": str(col["type"])}
+            for col in insp.get_columns(table_name)
+        ]
+    return jsonify(all_columns)
 
-insp = inspect(engine)
-
-print("Tables:", insp.get_table_names())
-
-# Daftar tabel yang kamu punya
-tables = ["detail_pesanan", "menu", "pesanan"]
-
-for table_name in tables:
-    print(f"\nColumns for table '{table_name}':")
-    for col in insp.get_columns(table_name):
-        print(f"- {col['name']} ({col['type']})")
 # ---- PAGES ----
 @app.route("/")
 def home():
@@ -176,10 +176,6 @@ def api_delete_order(order_id):
     return jsonify({"ok": True})
 
 # ---- MAIN ----
-if __name__ == "__main__":
+if _name_ == "_main_":
     port = int(os.environ.get("PORT", 5000))
-
     app.run(host="0.0.0.0", port=port)
-
-
-
