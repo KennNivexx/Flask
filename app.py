@@ -13,13 +13,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = DB_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# ---- Helper: lazy DB connection dengan retry ----
+# ---- Lazy DB connection with retry ----
 def get_engine(retries=5, delay=2):
     for i in range(retries):
         try:
             engine = create_engine(DB_URI)
             with engine.connect() as conn:
-                print(f"[DEBUG] DB connected successfully on attempt {i+1}")
+                print(f"[DEBUG] DB connected on attempt {i+1}")
                 return engine
         except OperationalError as e:
             print(f"[DEBUG] DB connection attempt {i+1} failed: {e}")
@@ -29,7 +29,7 @@ def get_engine(retries=5, delay=2):
 # ---- Pages ----
 @app.route("/")
 def home():
-    return jsonify({"status":"ok", "msg":"Backend jalan di Railway (free plan, debug)"})
+    return jsonify({"status":"ok","msg":"Backend jalan di Railway (free plan, debug)"})
 
 @app.route("/menu")
 def page_menu():
@@ -44,9 +44,7 @@ def page_penjual():
 def api_get_menus():
     engine = get_engine()
     with engine.connect() as conn:
-        result = conn.execute(
-            "SELECT id, nama, harga, COALESCE(gambar,'') AS gambar, kategori FROM menu ORDER BY id ASC"
-        )
+        result = conn.execute("SELECT id, nama, harga, COALESCE(gambar,'') AS gambar, kategori FROM menu ORDER BY id ASC")
         rows = [dict(r._mapping) for r in result]
     print(f"[DEBUG] Fetched {len(rows)} menu items")
     return jsonify(rows)
@@ -67,10 +65,7 @@ def api_add_menu():
 
     engine = get_engine()
     with engine.begin() as conn:
-        result = conn.execute(
-            "INSERT INTO menu (nama,harga,gambar,kategori) VALUES (%s,%s,%s,%s)",
-            (nama,harga,gambar,kategori)
-        )
+        result = conn.execute("INSERT INTO menu (nama,harga,gambar,kategori) VALUES (%s,%s,%s,%s)", (nama,harga,gambar,kategori))
         menu_id = result.lastrowid
     print(f"[DEBUG] Added menu id {menu_id}")
     return jsonify({"ok": True, "id": menu_id})
@@ -88,10 +83,7 @@ def api_update_menu(menu_id):
 
     engine = get_engine()
     with engine.begin() as conn:
-        conn.execute(
-            "UPDATE menu SET nama=%s, harga=%s, gambar=%s, kategori=%s WHERE id=%s",
-            (nama,harga,gambar,kategori,menu_id)
-        )
+        conn.execute("UPDATE menu SET nama=%s, harga=%s, gambar=%s, kategori=%s WHERE id=%s", (nama,harga,gambar,kategori,menu_id))
     print(f"[DEBUG] Updated menu id {menu_id}")
     return jsonify({"ok": True})
 
@@ -113,13 +105,8 @@ def api_get_orders():
 
         for o in orders:
             items = conn.execute(
-                """
-                SELECT d.jumlah, m.id AS menu_id, m.nama, m.harga, m.gambar
-                FROM detail_pesanan d
-                JOIN menu m ON m.id = d.menu_id
-                WHERE d.pesanan_id = %s
-                """,
-                (o["id"],)
+                "SELECT d.jumlah, m.id AS menu_id, m.nama, m.harga, m.gambar "
+                "FROM detail_pesanan d JOIN menu m ON m.id=d.menu_id WHERE d.pesanan_id=%s", (o["id"],)
             )
             o["items"] = [dict(r._mapping) for r in items]
     print(f"[DEBUG] Fetched {len(orders)} orders")
@@ -156,16 +143,12 @@ def api_create_order():
 
     with engine.begin() as conn:
         result = conn.execute(
-            "INSERT INTO pesanan (nama_pembeli, nomor_meja, total, status, created_at) "
-            "VALUES (%s,%s,%s,%s,NOW())",
+            "INSERT INTO pesanan (nama_pembeli, nomor_meja, total, status, created_at) VALUES (%s,%s,%s,%s,NOW())",
             (nama, nomor_meja, total, "dibayar")
         )
         order_id = result.lastrowid
         for it in clean:
-            conn.execute(
-                "INSERT INTO detail_pesanan (pesanan_id, menu_id, jumlah) VALUES (%s,%s,%s)",
-                (order_id, it["menu_id"], it["qty"])
-            )
+            conn.execute("INSERT INTO detail_pesanan (pesanan_id, menu_id, jumlah) VALUES (%s,%s,%s)", (order_id, it["menu_id"], it["qty"]))
     print(f"[DEBUG] Created order id {order_id} with total {total}")
     return jsonify({"ok": True, "order_id": order_id, "total": total})
 
