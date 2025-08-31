@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import os
-from sqlalchemy import create_engine
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
@@ -14,15 +13,13 @@ DB_HOST = "metro.proxy.rlwy.net"
 DB_PORT = 49974
 DB_NAME = "railway"
 
-engine = create_engine(DB_URL, pool_pre_ping=True)
-DB_URL = os.getenv("mysql://root:poLaaimRkGHBdFcrCaiylBVZcXDbvGGn@mysql.railway.internal:3306/railway")
-app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
+app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://root:poLaaimRkGHBdFcrCaiylBVZcXDbvGGn@metro.proxy.rlwy.net:49974/railway"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # ===== MODELS =====
 class Menu(db.Model):
-    __tablename__ = "menu"
+    _tablename_ = "menu"
     id = db.Column(db.Integer, primary_key=True)
     nama = db.Column(db.String(255), nullable=False)
     harga = db.Column(db.Integer, nullable=False)
@@ -30,7 +27,7 @@ class Menu(db.Model):
     kategori = db.Column(db.String(50), default="makanan")
 
 class Pesanan(db.Model):
-    __tablename__ = "pesanan"
+    _tablename_ = "pesanan"
     id = db.Column(db.Integer, primary_key=True)
     nama_pembeli = db.Column(db.String(255))
     nomor_meja = db.Column(db.String(50))
@@ -40,7 +37,7 @@ class Pesanan(db.Model):
     items = db.relationship("DetailPesanan", backref="pesanan", cascade="all, delete-orphan")
 
 class DetailPesanan(db.Model):
-    __tablename__ = "detail_pesanan"
+    _tablename_ = "detail_pesanan"
     id = db.Column(db.Integer, primary_key=True)
     pesanan_id = db.Column(db.Integer, db.ForeignKey("pesanan.id"))
     menu_id = db.Column(db.Integer, db.ForeignKey("menu.id"))
@@ -173,10 +170,6 @@ def api_delete_order(order_id):
     return jsonify({"ok": True})
 
 # ===== MAIN =====
-if __name__ == "__main__":
+if __name__ == "_main_":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
-
-
-
