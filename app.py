@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import os
 
-app = Flask(_name_, static_folder='static', template_folder='templates')
+app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
 
 # ---- Database Config ----
@@ -148,7 +148,8 @@ def api_create_order():
     return jsonify({"ok": True, "order_id": order.id, "total": total})
 
 # ---- MAIN ----
-if _name_ == "_main_":
+if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     db.create_all()
     app.run(host="0.0.0.0", port=port)
+
