@@ -18,13 +18,15 @@ engine = create_engine("mysql+pymysql://root:poLaaimRkGHBdFcrCaiylBVZcXDbvGGn@me
 
 insp = inspect(engine)
 
-print(insp.get_table_names())
+print("Tables:", insp.get_table_names())
 
-for col in insp.get_columns("railway"):
-    print(col["detail_pesanan"], col["type"])
-    print(col["menu"], col["type"])
-    print(col["pesanan"], col["type"])
+# Daftar tabel yang kamu punya
+tables = ["detail_pesanan", "menu", "pesanan"]
 
+for table_name in tables:
+    print(f"\nColumns for table '{table_name}':")
+    for col in insp.get_columns(table_name):
+        print(f"- {col['name']} ({col['type']})")
 # ---- PAGES ----
 @app.route("/")
 def home():
@@ -178,5 +180,6 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
 
     app.run(host="0.0.0.0", port=port)
+
 
 
