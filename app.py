@@ -18,7 +18,7 @@ engine = create_engine("mysql+pymysql://root:poLaaimRkGHBdFcrCaiylBVZcXDbvGGn@me
 
 insp = inspect(engine)
 
-print(insp.get_table_name())
+print(insp.get_table_names())
 
 for col in insp.get_columns("railway"):
     print(col["detail_pesanan"], col["type"])
@@ -178,4 +178,5 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
 
     app.run(host="0.0.0.0", port=port)
+
 
