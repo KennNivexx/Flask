@@ -2,18 +2,21 @@ from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import os
+from sqlalchemy import create_engine
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
 
 # ===== Database Config =====
-DB_USER = "root",
-DB_PASS = "poLaaimRkGHBdFcrCaiylBVZcXDbvGGn",
-DB_HOST = "metro.proxy.rlwy.net",
-DB_PORT = 49974,
+DB_USER = "root"
+DB_PASS = "poLaaimRkGHBdFcrCaiylBVZcXDbvGGn"
+DB_HOST = "metro.proxy.rlwy.net"
+DB_PORT = 49974
 DB_NAME = "railway"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://root:poLaaimRkGHBdFcrCaiylBVZcXDbvGGn@metro.proxy.rlwy.net:49974/railway"
+engine = create_engine(DB_URL, pool_pre_ping=True)
+DB_URL = os.getenv("mysql://root:poLaaimRkGHBdFcrCaiylBVZcXDbvGGn@mysql.railway.internal:3306/railway"
+app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -173,5 +176,6 @@ def api_delete_order(order_id):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
 
