@@ -46,7 +46,7 @@ class DetailPesanan(db.Model):
 # ===== ROUTES =====
 @app.route("/")
 def home():
-    return jsonify({"✅ Backend Jalan Brooo": True})
+    return print ({"✅ Backend Jalan Brooo": True})
 
 # ---- API MENUS ----
 @app.route("/api/menus", methods=["GET"])
@@ -173,3 +173,4 @@ def api_delete_order(order_id):
 if __name__ == "_main_":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
