@@ -7,11 +7,11 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
 
 # ===== Database Config =====
-DB_USER = os.eviron.get("root")
-DB_PASS = os.eviron.get("poLaaimRkGHBdFcrCaiylBVZcXDbvGGn")
-DB_HOST = os.eviron.get("metro.proxy.rlwy.net")
-DB_PORT = os.eviron.get("49974")
-DB_NAME = os.eviron.get("railway")
+DB_USER = os.environ.get("root")
+DB_PASS = os.environ.get("poLaaimRkGHBdFcrCaiylBVZcXDbvGGn")
+DB_HOST = os.environ.get("metro.proxy.rlwy.net")
+DB_PORT = os.environ.get("49974")
+DB_NAME = os.environ.get("railway")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://root:poLaaimRkGHBdFcrCaiylBVZcXDbvGGn@metro.proxy.rlwy.net:49974/railway"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -19,7 +19,7 @@ db = SQLAlchemy(app)
 
 # ===== MODELS =====
 class Menu(db.Model):
-    tablename = "menu"
+    __tablename__ = "menu"
     id = db.Column(db.Integer, primary_key=True)
     nama = db.Column(db.String(255), nullable=False)
     harga = db.Column(db.Integer, nullable=False)
@@ -27,7 +27,7 @@ class Menu(db.Model):
     kategori = db.Column(db.String(50), default="makanan")
 
 class Pesanan(db.Model):
-    tablename = "pesanan"
+    __tablename__ = "pesanan"
     id = db.Column(db.Integer, primary_key=True)
     nama_pembeli = db.Column(db.String(255))
     nomor_meja = db.Column(db.String(50))
@@ -37,7 +37,7 @@ class Pesanan(db.Model):
     items = db.relationship("DetailPesanan", backref="pesanan", cascade="all, delete-orphan")
 
 class DetailPesanan(db.Model):
-    tablename = "detail_pesanan"
+    __tablename__ = "detail_pesanan"
     id = db.Column(db.Integer, primary_key=True)
     pesanan_id = db.Column(db.Integer, db.ForeignKey("pesanan.id"))
     menu_id = db.Column(db.Integer, db.ForeignKey("menu.id"))
@@ -350,3 +350,4 @@ def api_delete_order(order_id):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
+
