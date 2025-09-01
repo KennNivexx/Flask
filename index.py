@@ -6,48 +6,16 @@ import os
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
 
-# ===== Database Config =====
-DB_USER = os.eviron.get("root")
-DB_PASS = os.eviron.get("poLaaimRkGHBdFcrCaiylBVZcXDbvGGn")
-DB_HOST = os.eviron.get("metro.proxy.rlwy.net")
-DB_PORT = os.eviron.get("49974")
-DB_NAME = os.eviron.get("railway")
-
-app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://root:poLaaimRkGHBdFcrCaiylBVZcXDbvGGn@metro.proxy.rlwy.net:49974/railway"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-
-# ===== MODELS =====
-class Menu(db.Model):
-    tablename = "menu"
-    id = db.Column(db.Integer, primary_key=True)
-    nama = db.Column(db.String(255), nullable=False)
-    harga = db.Column(db.Integer, nullable=False)
-    gambar = db.Column(db.String(255))
-    kategori = db.Column(db.String(50), default="makanan")
-
-class Pesanan(db.Model):
-    tablename = "pesanan"
-    id = db.Column(db.Integer, primary_key=True)
-    nama_pembeli = db.Column(db.String(255))
-    nomor_meja = db.Column(db.String(50))
-    total = db.Column(db.Integer)
-    status = db.Column(db.String(50), default="dibayar")
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
-    items = db.relationship("DetailPesanan", backref="pesanan", cascade="all, delete-orphan")
-
-class DetailPesanan(db.Model):
-    tablename = "detail_pesanan"
-    id = db.Column(db.Integer, primary_key=True)
-    pesanan_id = db.Column(db.Integer, db.ForeignKey("pesanan.id"))
-    menu_id = db.Column(db.Integer, db.ForeignKey("menu.id"))
-    jumlah = db.Column(db.Integer, default=1)
 
 # ===== ROUTES =====
 @app.route("/")
 def home():
     return jsonify ({"✅ Backend Jalan Brooo": True})
 
+@app.route("/initb")
+def initdb():
+    db.create_all()
+    return "Database created!"
 # ---- API MENUS ----
 @app.route("/api/menus", methods=["GET"])
 def api_get_menus():
@@ -345,4 +313,5 @@ def api_delete_order(order_id):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
